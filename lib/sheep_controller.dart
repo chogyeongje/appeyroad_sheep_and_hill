@@ -8,8 +8,6 @@ class SheepController {
   final String imagePath;
   final num width;
 
-  static final List<TripleOffset> dots = [];
-
   final totalFrame = 8;
   final curFrame = 0;
 
@@ -45,11 +43,15 @@ class SheepController {
     items.add(Sheep(image, width));
   }
 
+  static final List<TripleOffset> _dots = [];
+
   addOffset(TripleOffset offset){
-    dots.add(offset);
+    _dots.add(offset);
   }
 
   resetOffset() {
-    dots.clear();
+    _dots.clear();
   }
+
+  static get dots => _dots;
 }
