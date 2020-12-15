@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:appeyroad_sheep_and_hill/sheep_controller.dart';
+import 'package:appeyroad_sheep_and_hill/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:simple_animations/simple_animations.dart';
 
@@ -10,11 +12,12 @@ class Hill extends StatefulWidget {
   final Color color;
   final double velocity;
   final int total;
+  final SheepController sheepController;
 
-  Hill(this.height, this.width, this.color, this.velocity, this.total, {Key key,}) : super(key: key);
+  Hill(this.height, this.width, this.color, this.velocity, this.total, {Key key, this.sheepController}) : super(key: key);
 
   @override
-  _HillState createState() => _HillState(height, width, color, velocity, total);
+  _HillState createState() => _HillState(height, width, color, velocity, total, sheepController);
 }
 
 class _HillState extends State<Hill> {
@@ -24,9 +27,10 @@ class _HillState extends State<Hill> {
   final Color color;
   final double velocity;
   final int total;
+  final SheepController sheepController;
   final List<Offset> points = [];
 
-  _HillState(this.height, this.width, this.color, this.velocity, this.total);
+  _HillState(this.height, this.width, this.color, this.velocity, this.total, this.sheepController);
 
   @override
   void initState() {
@@ -50,7 +54,7 @@ class _HillState extends State<Hill> {
         tween: Tween()..begin = 0.0..end = 2,
         builder: (context, child, value) {
           return CustomPaint(
-            foregroundPainter: HillPainter(color, velocity, total, points),
+            foregroundPainter: HillPainter(color, velocity, total, points, sheepController),
           );
         },
       ),
@@ -64,8 +68,9 @@ class HillPainter extends CustomPainter {
   final double velocity;
   final int total;
   final List<Offset> points;
+  final SheepController sheepController;
 
-  HillPainter(this.color, this.velocity, this.total, this.points);
+  HillPainter(this.color, this.velocity, this.total, this.points, this.sheepController);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -91,6 +96,10 @@ class HillPainter extends CustomPainter {
     var prevCx = cur.dx;
     var prevCy = cur.dy;
 
+    if (sheepController != null) {
+      sheepController.resetOffset();
+    }
+
     for (int i = 1; i < points.length; i++) {
       points[i] = points[i].translate(velocity, 0);
       cur = points[i];
@@ -99,6 +108,10 @@ class HillPainter extends CustomPainter {
       cy = (prev.dy + cur.dy) / 2;
 
       path.quadraticBezierTo(prev.dx, prev.dy, cx, cy);
+
+      if (sheepController != null) {
+        sheepController.addOffset(TripleOffset(prevCx, prevCy, prev.dx, prev.dy, cx, cy));
+      }
 
       prevCx = cx;
       prevCy = cy;
